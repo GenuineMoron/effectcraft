@@ -704,6 +704,8 @@ mod tests {
         "prop.setExpression",
         "prop.toggleAnimation",
         "prop.toggleKey",
+        "swatch.link",
+        "swatch.unlink",
         "track.new",
         "track.property",
         "track.setTarget",

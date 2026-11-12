@@ -68,6 +68,8 @@ pub enum Req {
     Sample { comp: u64, layer: u64, x: Secs, y: Secs, rx: Secs, ry: Secs, post: bool, t: Secs },
     /// `thisProject`: `[bitsPerChannel, linearBlending, workingSpace]`.
     Project,
+    /// A project swatch's colour by name, in `theme` (empty: the active theme).
+    Swatch { name: String, theme: String },
     /// A layer's source item (AE's `Layer.source`): `[kind, id, name, width, height, duration,
     /// frameDuration, pixelAspect]`, kind `"comp"` (id = the precomp's composition) or `"footage"`
     /// (footage, solids and models), or null for layers without an item (text, shape, null…).
@@ -552,6 +554,12 @@ impl<'a> Resolver<'a> {
                 Resp::Bool(project.settings.blend_linear || project.settings.linearize),
                 Resp::Str(project.settings.working_space.map(|w| format!("{w:?}")).unwrap_or_default()),
             ]),
+            Req::Swatch { name, theme } => {
+                let sw = &project.swatches;
+                let s = sw.by_name(name)?;
+                let theme = if theme.is_empty() { sw.theme.as_deref() } else { Some(theme.as_str()) };
+                Resp::nums(s.color_in(theme))
+            }
             Req::SourceInfo { comp, layer } => {
                 let c = self.comp(*comp)?;
                 let l = self.layer(*comp, *layer)?;

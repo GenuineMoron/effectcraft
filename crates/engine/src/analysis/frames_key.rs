@@ -227,6 +227,7 @@ impl Text {
         self.num("stretch", layer.stretch);
         self.opt("timeRemap", layer.props.get("timeRemap"), |t, pr| t.property(pr));
         self.opt("compRate", p.comp(comp).map(|c| &c.frame_rate), |t, r| t.rate("rate", *r));
+        self.linked_colors(p, &layer.props);
     }
 
     fn layer_source(&mut self, s: &LayerSource) {
@@ -552,6 +553,7 @@ impl Text {
         self.form("autoOrient", auto_orient);
         self.field("environment", format_args!("{environment}/{environment_background}"));
         self.group(props, 0);
+        self.linked_colors(p, props);
     }
 
     fn switches(&mut self, s: &Switches) {
@@ -652,8 +654,24 @@ impl Text {
         // Expressions read the name (`thisProperty.name`) and seed `random`/`wiggle` with the
         // uid: the uid is written for a property with an expression. UI hints and the 2D/3D-only
         // and hold-only flags say where and how it can be edited, not what it evaluates to.
-        let Property { uid, match_id, name, value, keys, expr, ui: _, spatial, hold_only: _, three_d_only: _, two_d_only: _, shown_dims: _, static_only: _ } =
-            pr;
+        // A swatch link shows the swatch's colour instead of the value and keys: the link is
+        // written here, the colour it shows by `linked_colors` (which can read the swatches).
+        let Property {
+            uid,
+            match_id,
+            name,
+            value,
+            keys,
+            expr,
+            ui: _,
+            spatial,
+            hold_only: _,
+            three_d_only: _,
+            two_d_only: _,
+            shown_dims: _,
+            static_only: _,
+            swatch,
+        } = pr;
         self.str("prop", match_id);
         self.str("name", name);
         if expr.is_some() {
@@ -669,6 +687,28 @@ impl Text {
             t.str("text", text);
             t.field("enabled", enabled);
         });
+        // Only when linked, so properties without a link keep their keys (and saved analyses).
+        if let Some(id) = swatch {
+            self.field("swatch", id);
+        }
+    }
+
+    /// The colours `props`' swatch links show (in the active theme): a swatch edit changes the
+    /// frames of the layers linked to it, and of no other.
+    fn linked_colors(&mut self, p: &Project, props: &PropGroup) {
+        let mut links = Vec::new();
+        props.walk("", &mut |_, pr| {
+            if let Some(id) = pr.swatch {
+                links.push(id);
+            }
+        });
+        for id in links {
+            self.field("swatch", id);
+            match p.swatches.resolve(id) {
+                Some(c) => c.iter().for_each(|x| self.num("c", *x)),
+                None => self.word("missing"),
+            }
+        }
     }
 
     fn keyframe(&mut self, k: &Keyframe) {

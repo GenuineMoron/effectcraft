@@ -649,7 +649,8 @@ fn hash_values(h: &mut KeyHasher, ctx: &EvalCtx, layer: &Layer, g: &PropGroup) {
     for c in &g.children {
         match c {
             Node::Prop(p) => {
-                if !p.keys.is_empty() || p.has_expression() {
+                // (a colour linked to a project swatch shows what the swatch holds now)
+                if !p.keys.is_empty() || p.has_expression() || p.swatch.is_some() {
                     p.uid.hash(h);
                     hash_debug(h, &ctx.value(layer, p));
                 }

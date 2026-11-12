@@ -1629,6 +1629,11 @@ fn comp_content_key_for_renderer(project: &effectcraft_project::Project, comp: e
     let mut h = Hash128::default();
     h.write(renderer.as_bytes());
     hash_debug(&mut h, &project.settings);
+    // What linked colours show: the swatches and the active theme (only with swatches, so the keys
+    // of projects without any stay as they were).
+    if !project.swatches.list.is_empty() {
+        h.write_u64(project.swatches.content_hash());
+    }
     let heard = project.heard_layers();
     let reach = project.pixel_reach(comp, &heard);
     // Expressions can read any layer of the comps they reach, hidden or not, and their markers

@@ -16,6 +16,7 @@ pub mod render_queue;
 pub mod render_templates;
 pub mod sequence;
 pub mod styles;
+pub mod swatches;
 pub mod tracking;
 
 use std::collections::BTreeMap;
@@ -69,6 +70,9 @@ pub struct Project {
     /// Render Queue preferences (Notify, storage overflow folders).
     #[serde(default, skip_serializing_if = "render_queue::RenderQueuePrefs::is_default")]
     pub render_prefs: render_queue::RenderQueuePrefs,
+    /// Project swatches and the active theme ([`swatches`]).
+    #[serde(default, skip_serializing_if = "swatches::Swatches::is_empty")]
+    pub swatches: swatches::Swatches,
 }
 
 #[cfg(test)]

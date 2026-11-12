@@ -18,7 +18,7 @@ var selectorValue = [100, 100, 100];
 
 // Request ops (must match runtime.rs).
 var __COMP = 0, __COMPNAME = 1, __LAYER = 2, __LINFO = 3, __CHILD = 4, __PINFO = 5, __VALUE = 6, __XFORM = 7, __RECT = 8, __MARKERS = 9, __DOC = 10;
-var __FOOT = 11, __FDATA = 12, __SAMPLE = 13, __PROJ = 14, __SOURCE = 15, __ANCESTOR = 16;
+var __FOOT = 11, __FDATA = 12, __SAMPLE = 13, __PROJ = 14, __SOURCE = 15, __ANCESTOR = 16, __SWATCH = 17;
 
 function __begin(t, v, c, l, path, uid, idx, fd, ti, tt, sv) {
   time = t;
@@ -595,6 +595,13 @@ Footage.prototype = {
   get dataKeyNames() { return this.__data.header || []; },
   toString: function () { return '[object Footage]'; },
 };
+
+// A project swatch's colour [r, g, b, a], by name, in the active theme or in `theme` (#3362).
+function swatch(name, theme) {
+  var c = __h(__SWATCH, String(name), theme === undefined || theme === null ? '' : String(theme));
+  if (c === null) __err('Swatch named "' + name + '" does not exist');
+  return c;
+}
 
 function footage(name) {
   var info = __h(__FOOT, String(name));

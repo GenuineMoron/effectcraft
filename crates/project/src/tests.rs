@@ -535,3 +535,25 @@ fn an_item_inside_a_non_folder_moves_to_the_top_level_when_a_project_is_opened()
     // Nothing to repair in a sound project.
     assert!(Project::from_json_repaired(&q.to_json()).expect("opens").1.is_empty());
 }
+
+#[test]
+fn same_content_sees_swatch_edits() {
+    let a = Project::default();
+    let mut b = a.clone();
+    b.swatches.theme = Some("Dark".into());
+    assert!(!a.same_content(&b), "a theme switch is an edit");
+    let mut c = a.clone();
+    c.swatches.list.push(crate::swatches::Swatch { id: 1, name: "Navy".into(), group: String::new(), color: [0.0, 0.0, 1.0, 1.0], themes: Default::default() });
+    assert!(!a.same_content(&c), "a swatch is content");
+}
+
+#[test]
+fn an_unlinked_property_prints_as_before_swatches() {
+    // Keys saved before swatches existed hash this text (analysis keys of 0.22–0.24).
+    let mut p = crate::Property::new(7, "color", "Color", effectcraft_keyframe::Value::Color([1.0, 0.0, 0.0, 1.0]));
+    let text = format!("{p:?}");
+    assert!(!text.contains("swatch"), "{text}");
+    assert!(text.ends_with("shown_dims: 0, static_only: false }"), "{text}");
+    p.swatch = Some(3);
+    assert!(format!("{p:?}").ends_with("static_only: false, swatch: 3 }"));
+}

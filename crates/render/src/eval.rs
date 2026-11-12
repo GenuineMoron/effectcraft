@@ -87,13 +87,23 @@ impl<'a> EvalCtx<'a> {
     /// fractional stretch: a Hold key at `lt` could read its previous value). An expression
     /// still runs at the context time.
     pub fn value_at_layer_time(&self, layer: &Layer, prop: &Property, lt: Tick) -> Value {
-        let v = prop.value_at(lt);
+        let v = self.linked(prop).unwrap_or_else(|| prop.value_at(lt));
         if prop.has_expression()
             && let Some(h) = self.expr
         {
             return h.eval(self, layer, prop, &v).unwrap_or(v);
         }
         v
+    }
+    /// The colour of the project swatch `prop` is linked to, in the active theme
+    /// ([`effectcraft_project::swatches`]); `None` when it isn't a linked colour property or the
+    /// swatch is gone.
+    pub fn linked(&self, prop: &Property) -> Option<Value> {
+        let id = prop.swatch?;
+        if !matches!(prop.value, Value::Color(_)) {
+            return None;
+        }
+        self.project.swatches.resolve(id).map(Value::Color)
     }
     pub fn group_value(&self, layer: &Layer, g: &PropGroup, m: &str) -> Option<Value> {
         g.get(m).map(|p| self.value(layer, p))

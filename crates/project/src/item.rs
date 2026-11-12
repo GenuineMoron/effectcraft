@@ -124,6 +124,7 @@ impl Default for Project {
             render_queue: Vec::new(),
             render_templates: Default::default(),
             render_prefs: Default::default(),
+            swatches: Default::default(),
         }
     }
 }
@@ -362,6 +363,7 @@ impl Project {
             && self.render_queue == other.render_queue
             && self.render_templates == other.render_templates
             && self.render_prefs == other.render_prefs
+            && self.swatches == other.swatches
     }
     /// The project file's text: the project with the version that wrote it (`savedBy`), checked
     /// to read back, so a save never writes a file that can't be opened. Values JSON can't hold

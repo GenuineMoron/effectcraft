@@ -60,6 +60,7 @@ mod shared_layers;
 mod shortcut_cmds;
 pub(crate) mod stubs;
 mod styles;
+mod swatches;
 mod tail;
 mod text;
 mod text_edit;

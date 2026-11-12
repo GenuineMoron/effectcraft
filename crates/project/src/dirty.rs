@@ -17,8 +17,12 @@ impl Project {
     /// can't change the picture ([`Project::silent_layers`]) don't count, nor does the audio of
     /// layers no effect draws it from (`heard`, best of both states). Expressions can read
     /// anything, so any change (`outside` these comps too: another comp, an item's name) reaches
-    /// the layers that have one. `None` when the edit can reach any frame.
+    /// the layers that have one. `None` when the edit can reach any frame (a swatch edit does).
     pub fn dirty_spans(&self, old: &Project, comp: ItemId, heard: &Heard, outside: bool) -> Option<Vec<(Tick, Tick)>> {
+        // A swatch or theme edit recolours every property linked to it, wherever it is.
+        if self.swatches != old.swatches {
+            return None;
+        }
         self.dirty_spans_at(old, comp, heard, outside, 0, &mut std::collections::HashMap::new())
     }
 

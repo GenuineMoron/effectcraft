@@ -54,7 +54,7 @@ pub struct Expression {
     pub enabled: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Property {
     pub uid: Uid,
     /// Stable id within its parent kind (`position`, `blurriness`…).
@@ -87,6 +87,36 @@ pub struct Property {
     /// Can't be keyframed (header-like values, e.g. Mask Mode). Shown without a stopwatch.
     #[serde(default)]
     pub static_only: bool,
+    /// The project swatch a colour property is linked to ([`crate::swatches`]): it shows the
+    /// swatch's colour in the active theme instead of its own value and keyframes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub swatch: Option<crate::swatches::SwatchId>,
+}
+
+/// The derived format, with `swatch` only when the property is linked: `Debug` text is hashed
+/// by keys saved before swatches existed (analysis keys of 0.22–0.24, disk cache content keys), so
+/// an unlinked property must print exactly as it did.
+impl std::fmt::Debug for Property {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut d = f.debug_struct("Property");
+        d.field("uid", &self.uid)
+            .field("match_id", &self.match_id)
+            .field("name", &self.name)
+            .field("value", &self.value)
+            .field("keys", &self.keys)
+            .field("expr", &self.expr)
+            .field("ui", &self.ui)
+            .field("spatial", &self.spatial)
+            .field("hold_only", &self.hold_only)
+            .field("three_d_only", &self.three_d_only)
+            .field("two_d_only", &self.two_d_only)
+            .field("shown_dims", &self.shown_dims)
+            .field("static_only", &self.static_only);
+        if let Some(s) = &self.swatch {
+            d.field("swatch", s);
+        }
+        d.finish()
+    }
 }
 
 impl Property {
@@ -106,6 +136,7 @@ impl Property {
             two_d_only: false,
             shown_dims: 0,
             static_only: false,
+            swatch: None,
         }
     }
     pub fn with_ui(mut self, ui: ParamUi) -> Property {

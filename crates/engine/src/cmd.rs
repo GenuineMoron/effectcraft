@@ -69,6 +69,7 @@ pub mod shape_stroke;
 pub mod shape_tool;
 mod stubs;
 mod styles;
+mod swatches;
 mod text_anim;
 pub mod text_edit;
 mod three_d;
@@ -216,6 +217,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(shape_tool::specs());
         v.extend(focus::specs());
         v.extend(key_labels::specs());
+        v.extend(swatches::specs());
         v.extend(key_transform::specs());
         v.extend(quick_offset::specs());
         v.extend(file_more::specs());
